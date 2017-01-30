@@ -11,8 +11,13 @@ real_spectrum = np.zeros(21)
 
 max_iterations = 20000
 min_it = max_iterations - 10000
-max_it = max_iterations + 10000
+max_it = max_iterations + 20000
 step_it = 10000
+
+max_particles = 12000 
+min_part = max_particles - 4000
+max_part = max_particles + 4000
+step_part = 1000
 
 def make_graphics(fds_real, fds_synth, gen_call):
     fig = plt.figure()
@@ -26,27 +31,28 @@ def make_graphics(fds_real, fds_synth, gen_call):
 print "Starting for..."
 
 for it in range(min_it, max_it, step_it):
-    args_call = str(it) + " 12000 400 0.035 0.15"
-    generation_call = "./porous_generation/porous_generate " + args_call
+    for part in range(min_part, max_part, step_part):
+        args_call = str(it) + " " + str(part) + " 400 0.035 0.15"
+        generation_call = "./porous_generation/porous_generate " + args_call
 
-    print ""
-    os.system(generation_call)
-    distance, synth_spectrum, real_spec = test_comparison.compare()
-    print "Distance real - synthetic : ", distance
+        print ""
+        os.system(generation_call)
+        distance, synth_spectrum, real_spec = test_comparison.compare()
+        print "Distance real - synthetic : ", distance
 
-    if(distance < min_distance):
-        min_distance = distance
-        min_spectrum = synth_spectrum
-        real_spectrum = real_spec
-        min_call = "Args: " + args_call + ", " + str(min_distance)
+        if(distance < min_distance):
+            min_distance = distance
+            min_spectrum = synth_spectrum
+            real_spectrum = real_spec
+            min_call = "Args: " + args_call + ", " + str(min_distance)
 
-        make_graphics(real_spectrum, min_spectrum, min_call)
+            make_graphics(real_spectrum, min_spectrum, min_call)
 
-    print "CURRENT MINIMUM:"
-    print min_distance
-    print min_spectrum
-    print min_call
-    print ""
+        print "CURRENT MINIMUM:"
+        print min_distance
+        print min_spectrum
+        print min_call
+        print ""
 
 
 
