@@ -50,6 +50,8 @@ def compare(it, part, size, rand, rand_z, real_spectrum, min_distance):
     args_call = str(it) + " " + str(part) + " " + str(size) + " " + str(rand) + " " + str(rand_z)
     generation_call = "./porous_generation/porous_generate " + args_call
 
+    change=False
+
     print ""
     os.system(generation_call)
     distance, synth_spectrum, real_spec = test_comparison.compare(real_spectrum)
@@ -62,6 +64,7 @@ def compare(it, part, size, rand, rand_z, real_spectrum, min_distance):
         min_call = "Args: " + args_call + ", " + str(min_distance)
 
         make_graphics(real_spectrum, min_spectrum, min_call)
+        change=True
 
     print "CURRENT MINIMUM:"
     print min_distance
@@ -69,7 +72,29 @@ def compare(it, part, size, rand, rand_z, real_spectrum, min_distance):
     print min_call
     print ""
 
-    return real_spectrum, min_distance, min_spectrum, min_call
+    return real_spectrum, min_distance, min_spectrum, min_call, change
+
+def go_direction(sign, min_distance_ret, varss, var_i, steps, real_spectrum, current_minimum):
+    min_spectrum = []
+    min_call = ""
+    min_distance = min_distance_ret
+    change=True
+
+    while(change):
+
+            print min_distance_ret, current_minimum, min_distance
+
+            print "New min distance: ", min_distance_ret
+            print "chosen variable: ", var_i
+
+            min_distance = min_distance_ret
+
+            varss[var_i] += steps[var_i] * sign
+
+            real_spectrum, min_distance_ret, min_spectrum, min_call, change = compare(varss[0], varss[1], varss[2], varss[3], varss[4], real_spectrum, min_distance)
+
+
+    return min_distance_ret, min_spectrum, min_call
 
 print "Starting for..."
 
@@ -83,6 +108,7 @@ def brute_force():
 
 def follow_gradient_dumb(real_spectrum, min_distance):
     min_call = ""
+    min_distance = 100000000
     # generate random position in hyperspace
     it = int(floor(random.uniform(min_it, max_it)))
     part = int(floor(random.uniform(min_part, max_part)))
@@ -96,7 +122,6 @@ def follow_gradient_dumb(real_spectrum, min_distance):
 
     # randomly choose one variable
     var_i = random.randint(0,4)
-    var = varss[var_i]
 
     # generate random direction: 1 or -1 (0)
     direction = random.randint(0,1)
@@ -104,22 +129,28 @@ def follow_gradient_dumb(real_spectrum, min_distance):
     # first call
     args_call = "ARGS: " + str(it) + " " + str(part) + " " + str(size) + " " + str(rand) + " " + str(rand_z)
     print args_call
-    real_spectrum, min_distance_ret, min_spectrum, min_call = compare(it, part, size, rand, rand_z, real_spectrum, min_distance)
+    real_spectrum, min_distance_ret, min_spectrum, min_call, change = compare(it, part, size, rand, rand_z, real_spectrum, min_distance)
 
-    while(min_distance_ret < min_distance):
+    sign = 1
+    if(direction <= 0):
+        sign = -1
 
-        print "New min distance: ", min_distance_ret
+    min_distance, min_spectrum, min_call = go_direction(sign, min_distance_ret, varss, var_i, steps, real_spectrum, min_distance_ret)
+    # see if the other direction is better
+    print "OTHER DIRECTION"
+    print min_spectrum
+    print "               "
+    print "               "
+    print "               "
+    print "               "
+    min_distance2, min_spectrum2, min_call2 = go_direction(-sign, min_distance, varss, var_i, steps, real_spectrum, min_distance)
 
-        min_distance = min_distance_ret
-
-        if(direction > 0):
-            varss[var_i] += steps[var_i]
-        else:
-            varss[var_i] -= steps[var_i]
-
-        real_spectrum, min_distance_ret, min_spectrum, min_call = compare(varss[0], varss[1], varss[2], varss[3], varss[4], real_spectrum, min_distance)
+    if min_distance2 < min_distance:
+        min_distance = min_distance2
+        min_spectrum = min_spectrum2
+        min_call = min_call2
     
-    return real_spectrum, min_distance_ret, min_spectrum, min_call
+    return real_spectrum, min_distance, min_spectrum, min_call
 
 
 
