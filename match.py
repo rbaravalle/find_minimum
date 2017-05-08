@@ -2,10 +2,11 @@ import os
 import numpy as np
 from imfractal import test_comparison
 import matplotlib.pyplot as plt
+import random
+from math import floor
 
 
 min_distance = 100000000
-min_call = ""
 min_synth_spectrum = np.zeros(21)
 real_spectrum = []
 
@@ -44,6 +45,8 @@ def make_graphics(fds_real, fds_synth, gen_call):
     plt.savefig('best_result.png')
 
 def compare(it, part, size, rand, rand_z, real_spectrum, min_distance):
+    min_call = ""
+    min_spectrum = []
     args_call = str(it) + " " + str(part) + " " + str(size) + " " + str(rand) + " " + str(rand_z)
     generation_call = "./porous_generation/porous_generate " + args_call
 
@@ -70,16 +73,58 @@ def compare(it, part, size, rand, rand_z, real_spectrum, min_distance):
 
 print "Starting for..."
 
-for it in range(min_it, max_it, step_it):
-    for part in range(min_part, max_part, step_part):
-        for size in range(min_size, max_size, step_size):
-            for rand in np.arange(min_rand, max_rand, step_rand):
-                for rand_z in np.arange(min_rand_z, max_rand_z, step_rand_z):
-                    real_spectrum, min_distance, min_spectrum, min_call = compare(it, part, size, rand, rand_z, real_spectrum, min_distance)
+def brute_force():
+    for it in range(min_it, max_it, step_it):
+        for part in range(min_part, max_part, step_part):
+            for size in range(min_size, max_size, step_size):
+                for rand in np.arange(min_rand, max_rand, step_rand):
+                    for rand_z in np.arange(min_rand_z, max_rand_z, step_rand_z):
+                        real_spectrum, min_distance, min_spectrum, min_call = compare(it, part, size, rand, rand_z, real_spectrum, min_distance)
+
+def follow_gradient_dumb(real_spectrum, min_distance):
+    min_call = ""
+    # generate random position in hyperspace
+    it = int(floor(random.uniform(min_it, max_it)))
+    part = int(floor(random.uniform(min_part, max_part)))
+    size = int(floor(random.uniform(min_size, max_size)))
+    rand = random.uniform(min_rand, max_rand)
+    rand_z = random.uniform(min_rand_z, max_rand_z)
+
+    #varss = ["it", "part", "size", "rand", "rand_z"]
+    varss = [it, part, size, rand, rand_z]
+    steps = [step_it, step_part, step_size, step_rand, step_rand_z]
+
+    # randomly choose one variable
+    var_i = random.randint(0,4)
+    var = varss[var_i]
+
+    # generate random direction: 1 or -1 (0)
+    direction = random.randint(0,1)
+
+    # first call
+    args_call = "ARGS: " + str(it) + " " + str(part) + " " + str(size) + " " + str(rand) + " " + str(rand_z)
+    print args_call
+    real_spectrum, min_distance_ret, min_spectrum, min_call = compare(it, part, size, rand, rand_z, real_spectrum, min_distance)
+
+    while(min_distance_ret < min_distance):
+
+        print "New min distance: ", min_distance_ret
+
+        min_distance = min_distance_ret
+
+        if(direction > 0):
+            varss[var_i] += steps[var_i]
+        else:
+            varss[var_i] -= steps[var_i]
+
+        real_spectrum, min_distance_ret, min_spectrum, min_call = compare(varss[0], varss[1], varss[2], varss[3], varss[4], real_spectrum, min_distance)
+    
+    return real_spectrum, min_distance_ret, min_spectrum, min_call
 
 
 
 
+real_spectrum, min_distance, min_spectrum, min_call = follow_gradient_dumb(real_spectrum, min_distance)
 print "..............Result............. "
 print "MINIMUM:"
 print min_distance
