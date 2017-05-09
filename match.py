@@ -96,35 +96,12 @@ def go_direction(sign, min_distance_ret, varss, var_i, steps, real_spectrum, cur
 
     return min_distance_ret, min_spectrum, min_call
 
-print "Starting for..."
-
-def brute_force():
-    for it in range(min_it, max_it, step_it):
-        for part in range(min_part, max_part, step_part):
-            for size in range(min_size, max_size, step_size):
-                for rand in np.arange(min_rand, max_rand, step_rand):
-                    for rand_z in np.arange(min_rand_z, max_rand_z, step_rand_z):
-                        real_spectrum, min_distance, min_spectrum, min_call = compare(it, part, size, rand, rand_z, real_spectrum, min_distance)
-
-def follow_gradient_dumb(real_spectrum, min_distance):
-    min_call = ""
-    min_distance = 100000000
-    # generate random position in hyperspace
-    it = int(floor(random.uniform(min_it, max_it)))
-    part = int(floor(random.uniform(min_part, max_part)))
-    size = int(floor(random.uniform(min_size, max_size)))
-    rand = random.uniform(min_rand, max_rand)
-    rand_z = random.uniform(min_rand_z, max_rand_z)
-
-    #varss = ["it", "part", "size", "rand", "rand_z"]
-    varss = [it, part, size, rand, rand_z]
-    steps = [step_it, step_part, step_size, step_rand, step_rand_z]
-
-    # randomly choose one variable
-    var_i = random.randint(0,4)
-
+def go_variable(var_i, it, part, size, rand, rand_z, real_spectrum, min_distance):
     # generate random direction: 1 or -1 (0)
     direction = random.randint(0,1)
+
+    varss = [it, part, size, rand, rand_z]
+    steps = [step_it, step_part, step_size, step_rand, step_rand_z]
 
     # first call
     args_call = "ARGS: " + str(it) + " " + str(part) + " " + str(size) + " " + str(rand) + " " + str(rand_z)
@@ -149,13 +126,42 @@ def follow_gradient_dumb(real_spectrum, min_distance):
         min_distance = min_distance2
         min_spectrum = min_spectrum2
         min_call = min_call2
+
+    return real_spectrum, min_distance, min_spectrum, min_call
+
+
+print "Starting for..."
+
+def brute_force():
+    for it in range(min_it, max_it, step_it):
+        for part in range(min_part, max_part, step_part):
+            for size in range(min_size, max_size, step_size):
+                for rand in np.arange(min_rand, max_rand, step_rand):
+                    for rand_z in np.arange(min_rand_z, max_rand_z, step_rand_z):
+                        real_spectrum, min_distance, min_spectrum, min_call = compare(it, part, size, rand, rand_z, real_spectrum, min_distance)
+
+def follow_gradient_dumb():
+    real_spectrum = []
+    min_call = ""
+    min_distance = 100000000
+    # generate random position in hyperspace
+    it = int(floor(random.uniform(min_it, max_it)))
+    part = int(floor(random.uniform(min_part, max_part)))
+    size = int(floor(random.uniform(min_size, max_size)))
+    rand = random.uniform(min_rand, max_rand)
+    rand_z = random.uniform(min_rand_z, max_rand_z)
+
+    # randomly choose one variable
+    var_i = random.randint(0,4)
+
+    real_spectrum, min_distance, min_spectrum, min_call = go_variable(var_i, it, part, size, rand, rand_z, real_spectrum, min_distance)
     
     return real_spectrum, min_distance, min_spectrum, min_call
 
 
 
 
-real_spectrum, min_distance, min_spectrum, min_call = follow_gradient_dumb(real_spectrum, min_distance)
+real_spectrum, min_distance, min_spectrum, min_call = follow_gradient_dumb()
 print "..............Result............. "
 print "MINIMUM:"
 print min_distance
