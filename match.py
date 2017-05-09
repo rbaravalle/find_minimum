@@ -66,12 +66,6 @@ def compare(it, part, size, rand, rand_z, min_distance):
         make_graphics(real_spectrum, min_spectrum, min_call)
         change=True
 
-    print "CURRENT MINIMUM:"
-    print min_distance
-    print min_spectrum
-    print min_call
-    print ""
-
     return min_distance, min_spectrum, min_call, change
 
 def go_direction(sign, varss, var_i, current_minimum):
@@ -84,15 +78,14 @@ def go_direction(sign, varss, var_i, current_minimum):
 
     while(change):
 
-            print "New min distance: ", min_distance
             print "chosen variable: ", var_i
 
             varss[var_i] += steps[var_i] * sign
 
-            min_distance, min_spectrum, min_call, change = compare(varss[0], varss[1], varss[2], varss[3], varss[4], current_minimum)
+            min_distance, min_spectrum, min_call, change = compare(varss[0], varss[1], varss[2], varss[3], varss[4], min_distance)
 
     # varss contains the best variables' value where the distance is minimum
-    return min_distance, min_spectrum, min_call, vars
+    return min_distance, min_spectrum, min_call, varss
 
 def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
     # generate random direction: 1 or -1 (0)
@@ -119,6 +112,13 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
     print "               "
     print "               "
     print "               "
+
+    print "CURRENT MINIMUM:"
+    print min_distance
+    print min_spectrum
+    print min_call
+    print ""
+
     min_distance2, min_spectrum2, min_call2, best_vars2 = go_direction(-sign, varss, var_i, min_distance)
 
     if min_distance2 < min_distance:
@@ -126,6 +126,12 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
         min_spectrum = min_spectrum2
         min_call = min_call2
         best_vars = best_vars2
+
+    print "CURRENT MINIMUM:"
+    print min_distance
+    print min_spectrum
+    print min_call
+    print ""
 
     return min_distance, min_spectrum, min_call, best_vars
 
@@ -152,10 +158,28 @@ def follow_gradient_dumb():
     rand = random.uniform(min_rand, max_rand)
     rand_z = random.uniform(min_rand_z, max_rand_z)
 
+    already_explored = np.zeros((5))
+
     # randomly choose one variable
     var_i = random.randint(0,4)
+    already_explored[var_i] = 1
 
     min_distance, min_spectrum, min_call, best_vars = go_variable(var_i, it, part, size, rand, rand_z, min_distance)
+
+    # randomly choose another variable
+    var_j = random.randint(0,4)
+    while already_explored[var_j] > 0:
+        var_j = random.randint(0,4)
+
+    print "Trying another variable...   ", var_j
+
+    min_distance2, min_spectrum2, min_call2, best_vars2 = go_variable(var_j, best_vars[0], best_vars[1], best_vars[2], best_vars[3], best_vars[4], min_distance)
+
+    if min_distance2 < min_distance:
+        min_distance = min_distance2
+        min_spectrum = min_spectrum2
+        min_call = min_call2
+        best_vars = best_vars2
 
 
     
