@@ -8,7 +8,6 @@ from math import floor
 
 min_distance = 100000000
 min_synth_spectrum = np.zeros(21)
-real_spectrum = []
 
 max_iterations = 20000
 min_it = max_iterations - 10000
@@ -44,7 +43,7 @@ def make_graphics(fds_real, fds_synth, gen_call):
     plt.legend()
     plt.savefig('best_result.png')
 
-def compare(it, part, size, rand, rand_z, real_spectrum, min_distance):
+def compare(it, part, size, rand, rand_z, min_distance):
     min_call = ""
     min_spectrum = []
     args_call = str(it) + " " + str(part) + " " + str(size) + " " + str(rand) + " " + str(rand_z)
@@ -54,7 +53,7 @@ def compare(it, part, size, rand, rand_z, real_spectrum, min_distance):
 
     print ""
     os.system(generation_call)
-    distance, synth_spectrum, real_spec = test_comparison.compare(real_spectrum)
+    distance, synth_spectrum, real_spec = test_comparison.compare([])
     print "Distance real - synthetic : ", distance
 
     if(distance < min_distance):
@@ -72,9 +71,9 @@ def compare(it, part, size, rand, rand_z, real_spectrum, min_distance):
     print min_call
     print ""
 
-    return real_spectrum, min_distance, min_spectrum, min_call, change
+    return min_distance, min_spectrum, min_call, change
 
-def go_direction(sign, min_distance_ret, varss, var_i, steps, real_spectrum, current_minimum):
+def go_direction(sign, min_distance_ret, varss, var_i, steps, current_minimum):
     min_spectrum = []
     min_call = ""
     min_distance = min_distance_ret
@@ -91,12 +90,12 @@ def go_direction(sign, min_distance_ret, varss, var_i, steps, real_spectrum, cur
 
             varss[var_i] += steps[var_i] * sign
 
-            real_spectrum, min_distance_ret, min_spectrum, min_call, change = compare(varss[0], varss[1], varss[2], varss[3], varss[4], real_spectrum, min_distance)
+            min_distance_ret, min_spectrum, min_call, change = compare(varss[0], varss[1], varss[2], varss[3], varss[4], min_distance)
 
 
     return min_distance_ret, min_spectrum, min_call
 
-def go_variable(var_i, it, part, size, rand, rand_z, real_spectrum, min_distance):
+def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
     # generate random direction: 1 or -1 (0)
     direction = random.randint(0,1)
 
@@ -106,13 +105,13 @@ def go_variable(var_i, it, part, size, rand, rand_z, real_spectrum, min_distance
     # first call
     args_call = "ARGS: " + str(it) + " " + str(part) + " " + str(size) + " " + str(rand) + " " + str(rand_z)
     print args_call
-    real_spectrum, min_distance_ret, min_spectrum, min_call, change = compare(it, part, size, rand, rand_z, real_spectrum, min_distance)
+    min_distance_ret, min_spectrum, min_call, change = compare(it, part, size, rand, rand_z, min_distance)
 
     sign = 1
     if(direction <= 0):
         sign = -1
 
-    min_distance, min_spectrum, min_call = go_direction(sign, min_distance_ret, varss, var_i, steps, real_spectrum, min_distance_ret)
+    min_distance, min_spectrum, min_call = go_direction(sign, min_distance_ret, varss, var_i, steps, min_distance_ret)
     # see if the other direction is better
     print "OTHER DIRECTION"
     print min_spectrum
@@ -120,14 +119,14 @@ def go_variable(var_i, it, part, size, rand, rand_z, real_spectrum, min_distance
     print "               "
     print "               "
     print "               "
-    min_distance2, min_spectrum2, min_call2 = go_direction(-sign, min_distance, varss, var_i, steps, real_spectrum, min_distance)
+    min_distance2, min_spectrum2, min_call2 = go_direction(-sign, min_distance, varss, var_i, steps, min_distance)
 
     if min_distance2 < min_distance:
         min_distance = min_distance2
         min_spectrum = min_spectrum2
         min_call = min_call2
 
-    return real_spectrum, min_distance, min_spectrum, min_call
+    return min_distance, min_spectrum, min_call
 
 
 print "Starting for..."
@@ -138,10 +137,9 @@ def brute_force():
             for size in range(min_size, max_size, step_size):
                 for rand in np.arange(min_rand, max_rand, step_rand):
                     for rand_z in np.arange(min_rand_z, max_rand_z, step_rand_z):
-                        real_spectrum, min_distance, min_spectrum, min_call = compare(it, part, size, rand, rand_z, real_spectrum, min_distance)
+                        min_distance, min_spectrum, min_call = compare(it, part, size, rand, rand_z, min_distance)
 
 def follow_gradient_dumb():
-    real_spectrum = []
     min_call = ""
     min_distance = 100000000
     # generate random position in hyperspace
@@ -154,17 +152,16 @@ def follow_gradient_dumb():
     # randomly choose one variable
     var_i = random.randint(0,4)
 
-    real_spectrum, min_distance, min_spectrum, min_call = go_variable(var_i, it, part, size, rand, rand_z, real_spectrum, min_distance)
+    min_distance, min_spectrum, min_call = go_variable(var_i, it, part, size, rand, rand_z, min_distance)
     
-    return real_spectrum, min_distance, min_spectrum, min_call
+    return min_distance, min_spectrum, min_call
 
 
 
 
-real_spectrum, min_distance, min_spectrum, min_call = follow_gradient_dumb()
+min_distance, min_spectrum, min_call = follow_gradient_dumb()
 print "..............Result............. "
 print "MINIMUM:"
 print min_distance
 print "SYNTH:" , min_spectrum
-print "REAL:" , real_spectrum
 print min_call
