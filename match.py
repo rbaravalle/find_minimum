@@ -91,14 +91,15 @@ def go_direction(sign, varss, var_i, current_minimum):
 
             min_distance, min_spectrum, min_call, change = compare(varss[0], varss[1], varss[2], varss[3], varss[4], current_minimum)
 
-
-    return min_distance, min_spectrum, min_call
+    # varss contains the best variables' value where the distance is minimum
+    return min_distance, min_spectrum, min_call, vars
 
 def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
     # generate random direction: 1 or -1 (0)
     direction = random.randint(0,1)
 
     varss = [it, part, size, rand, rand_z]
+    best_vars = varss
 
 
     # first call
@@ -110,7 +111,7 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
     if(direction <= 0):
         sign = -1
 
-    min_distance, min_spectrum, min_call = go_direction(sign, varss, var_i, min_distance_ret)
+    min_distance, min_spectrum, min_call, best_vars = go_direction(sign, varss, var_i, min_distance_ret)
     # see if the other direction is better
     print "OTHER DIRECTION"
     print min_spectrum
@@ -118,14 +119,15 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
     print "               "
     print "               "
     print "               "
-    min_distance2, min_spectrum2, min_call2 = go_direction(-sign, varss, var_i, min_distance)
+    min_distance2, min_spectrum2, min_call2, best_vars2 = go_direction(-sign, varss, var_i, min_distance)
 
     if min_distance2 < min_distance:
         min_distance = min_distance2
         min_spectrum = min_spectrum2
         min_call = min_call2
+        best_vars = best_vars2
 
-    return min_distance, min_spectrum, min_call
+    return min_distance, min_spectrum, min_call, best_vars
 
 
 print "Starting for..."
@@ -141,6 +143,7 @@ def brute_force():
 def follow_gradient_dumb():
     min_call = ""
     min_distance = 100000000
+    best_vars=[]
 
     # generate random position in hyperspace
     it = int(floor(random.uniform(min_it, max_it)))
@@ -152,18 +155,19 @@ def follow_gradient_dumb():
     # randomly choose one variable
     var_i = random.randint(0,4)
 
-    min_distance, min_spectrum, min_call = go_variable(var_i, it, part, size, rand, rand_z, min_distance)
+    min_distance, min_spectrum, min_call, best_vars = go_variable(var_i, it, part, size, rand, rand_z, min_distance)
 
 
     
-    return min_distance, min_spectrum, min_call
+    return min_distance, min_spectrum, min_call, best_vars
 
 
 
 
-min_distance, min_spectrum, min_call = follow_gradient_dumb()
+min_distance, min_spectrum, min_call, best_vars = follow_gradient_dumb()
 print "..............Result............. "
 print "MINIMUM:"
 print min_distance
 print "SYNTH:" , min_spectrum
 print min_call
+print best_vars
