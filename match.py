@@ -141,7 +141,8 @@ def brute_force():
 
 def follow_gradient_dumb():
 
-    min_distance_global = 100000000
+    BIG_NUMBER = 100000000
+    min_distance_global = BIG_NUMBER
     min_spectrum_global = []
     min_call_global = []
     best_vars_global = []
@@ -162,8 +163,22 @@ def follow_gradient_dumb():
       rand = random.uniform(min_rand, max_rand)
       rand_z = random.uniform(min_rand_z, max_rand_z)
 
+      min_distance, min_spectrum, min_call, _ = compare(it, part, size, rand, rand_z, min_distance_global)
 
-      min_distance = 100000000
+      # Generate a random position close to the last distance found
+      while min_distance - min_distance_global > 0.3 and not(min_distance_global==BIG_NUMBER) :
+          print "Generating random position..."
+
+          it = int(floor(random.uniform(min_it, max_it)))
+          part = int(floor(random.uniform(min_part, max_part)))
+          size = int(floor(random.uniform(min_size, max_size)))
+          rand = random.uniform(min_rand, max_rand)
+          rand_z = random.uniform(min_rand_z, max_rand_z)
+
+          min_distance, min_spectrum, min_call, _ = compare(it, part, size, rand, rand_z, min_distance)
+          print "Too high, recomputing... ", min_distance
+
+
 
       already_visited = np.zeros((5))
 
