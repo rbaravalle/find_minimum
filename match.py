@@ -52,7 +52,7 @@ def compare(it, part, size, rand, rand_z, min_distance):
 
     change=False
 
-    print ""
+    #print ""
     os.system(generation_call)
     global real_spectrum
     distance, synth_spectrum, real_spectrum = test_comparison.compare(real_spectrum)
@@ -78,8 +78,6 @@ def go_direction(sign, varss, var_i, current_minimum):
 
     while(change):
 
-            print "chosen variable: ", var_i
-
             varss[var_i] += steps[var_i] * sign
 
             min_distance, min_spectrum, min_call, change = compare(varss[0], varss[1], varss[2], varss[3], varss[4], min_distance)
@@ -97,7 +95,7 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
 
     # first call
     args_call = "ARGS: " + str(it) + " " + str(part) + " " + str(size) + " " + str(rand) + " " + str(rand_z)
-    print args_call
+    #print args_call
     min_distance_ret, min_spectrum, min_call, change = compare(it, part, size, rand, rand_z, min_distance)
 
     sign = 1
@@ -107,17 +105,11 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
     min_distance, min_spectrum, min_call, best_vars = go_direction(sign, varss, var_i, min_distance_ret)
     # see if the other direction is better
     print "OTHER DIRECTION"
-    print min_spectrum
-    print "               "
-    print "               "
-    print "               "
-    print "               "
-
-    print "CURRENT MINIMUM:"
-    print min_distance
-    print min_spectrum
-    print min_call
-    print ""
+    #print min_spectrum
+    #print "               "
+    #print "               "
+    #print "               "
+    #print "               "
 
     min_distance2, min_spectrum2, min_call2, best_vars2 = go_direction(-sign, varss, var_i, min_distance)
 
@@ -127,7 +119,7 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
         min_call = min_call2
         best_vars = best_vars2
 
-    print "CURRENT MINIMUM:"
+    print "CURRENT INNER MINIMUM:"
     print min_distance
     print min_spectrum
     print min_call
@@ -136,7 +128,7 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
     return min_distance, min_spectrum, min_call, best_vars
 
 
-print "Starting for..."
+#print "Starting for..."
 
 def brute_force():
     for it in range(min_it, max_it, step_it):
@@ -147,63 +139,91 @@ def brute_force():
                         min_distance, min_spectrum, min_call = compare(it, part, size, rand, rand_z, min_distance)
 
 def follow_gradient_dumb():
+
+    min_distance_global = 100000000
+    min_spectrum_global = []
+    min_call_global = []
+    best_vars_global = []
+
+    min_distance = min_distance_global
     min_call = ""
-    min_distance = 100000000
+
     best_vars=[]
 
-    # generate random position in hyperspace
-    it = int(floor(random.uniform(min_it, max_it)))
-    part = int(floor(random.uniform(min_part, max_part)))
-    size = int(floor(random.uniform(min_size, max_size)))
-    rand = random.uniform(min_rand, max_rand)
-    rand_z = random.uniform(min_rand_z, max_rand_z)
+
+    while True:
+
+      print "Generating random position!..........."
+      print "..........."
+      print "..........."
+      print "..........."
+      print "..........."
+      print "..........."
+      # generate random position in hyperspace
+      it = int(floor(random.uniform(min_it, max_it)))
+      part = int(floor(random.uniform(min_part, max_part)))
+      size = int(floor(random.uniform(min_size, max_size)))
+      rand = random.uniform(min_rand, max_rand)
+      rand_z = random.uniform(min_rand_z, max_rand_z)
 
 
-    already_visited = np.zeros((5))
-    num_vars = 0
-    # randomly choose one variable
-    var_i = random.randint(0,4)
-    already_visited[var_i] = 1
+      already_visited = np.zeros((5))
+      num_vars = 0
+      # randomly choose one variable
+      var_i = random.randint(0,4)
+      already_visited[var_i] = 1
 
-    min_distance, min_spectrum, min_call, best_vars = go_variable(var_i, it, part, size, rand, rand_z, min_distance)
- 
+      min_distance, min_spectrum, min_call, best_vars = go_variable(var_i, it, part, size, rand, rand_z, min_distance)
+   
 
-    while(num_vars < 5):
+      while(num_vars < 5):
 
-        # randomly choose another variable
-        var_j = random.randint(0,4)
+          # randomly choose another variable
+          var_j = random.randint(0,4)
 
-        while already_visited[var_j] > 0:
-            var_j = random.randint(0,4)
+          while already_visited[var_j] > 0:
+              var_j = random.randint(0,4)
 
-        already_visited[var_j] = 1
+          already_visited[var_j] = 1
 
-        print "Trying another variable...   ", var_j
-        print " --  "
-        print " --  "
-        print " --  "
-        print "Num vars tried out: ", num_vars
-        print "Already visited: ", already_visited
+          print "Trying another variable...   ", var_j
+          print " --  "
+          print " --  "
+          print " --  "
+          print "Num vars tried out: ", num_vars
+          print "Already visited: ", already_visited
 
-        min_distance2, min_spectrum2, min_call2, best_vars2 = go_variable(var_j, best_vars[0], best_vars[1], best_vars[2], best_vars[3], best_vars[4], min_distance)
+          min_distance2, min_spectrum2, min_call2, best_vars2 = go_variable(var_j, best_vars[0], best_vars[1], best_vars[2], best_vars[3], best_vars[4], min_distance)
 
-        if min_distance2 < min_distance:
-            min_distance = min_distance2
-            min_spectrum = min_spectrum2
-            min_call = min_call2
-            best_vars = best_vars2
+          if min_distance2 < min_distance:
+              min_distance = min_distance2
+              min_spectrum = min_spectrum2
+              min_call = min_call2
+              best_vars = best_vars2
 
-            # start over
-            num_vars = 0
-            already_visited = np.zeros((5))
-        else:
-            num_vars +=1
+              # start over
+              num_vars = 0
+              already_visited = np.zeros((5))
+          else:
+              num_vars +=1
 
-        var_i = var_j
+          var_i = var_j
 
 
+      if min_distance < min_distance_global:
+        min_distance_global = min_distance
+        min_spectrum_global = min_spectrum
+        min_call_global = min_call
+        best_vars_global = best_vars
+
+      print "CURRENT GLOBAL MINIMUM:"
+      print min_distance_global
+      print min_spectrum_global
+      print min_call_global
+      print best_vars_global
+      print ""
     
-    return min_distance, min_spectrum, min_call, best_vars
+    return min_distance_global, min_spectrum_global, min_call_global, best_vars_global
 
 
 
