@@ -6,7 +6,6 @@ import random
 from math import floor
 
 
-min_distance = 100000000
 min_synth_spectrum = np.zeros(21)
 real_spectrum = []
 
@@ -34,6 +33,12 @@ mid_rand_z = 0.75
 min_rand_z = mid_rand_z - 0.5
 max_rand_z = mid_rand_z + 0.5
 step_rand_z = 0.1
+
+BIG_NUMBER = 100000000
+min_distance_global = BIG_NUMBER
+min_spectrum_global = []
+min_call_global = []
+best_vars_global = []
 
 def make_graphics(fds_real, fds_synth, gen_call):
     fig = plt.figure()
@@ -103,7 +108,6 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
 
     min_distance, min_spectrum, min_call, best_vars = go_direction(sign, varss, var_i, min_distance_ret)
     # see if the other direction is better
-    print "OTHER DIRECTION"
 
     if min_distance_ret < min_distance:
         min_distance = min_distance_ret
@@ -124,7 +128,8 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
     print min_distance
     print min_spectrum
     print min_call
-    print ""
+    global min_distance_global
+    print "(global: ", min_distance_global, " )"
 
     return min_distance, min_spectrum, min_call, best_vars
 
@@ -140,12 +145,6 @@ def brute_force():
                         min_distance, min_spectrum, min_call = compare(it, part, size, rand, rand_z, min_distance)
 
 def follow_gradient_dumb():
-
-    BIG_NUMBER = 100000000
-    min_distance_global = BIG_NUMBER
-    min_spectrum_global = []
-    min_call_global = []
-    best_vars_global = []
 
     min_call = ""
 
@@ -163,10 +162,11 @@ def follow_gradient_dumb():
       rand = random.uniform(min_rand, max_rand)
       rand_z = random.uniform(min_rand_z, max_rand_z)
 
+      global min_distance_global
       min_distance, min_spectrum, min_call, _ = compare(it, part, size, rand, rand_z, min_distance_global)
 
       # Generate a random position close to the last distance found
-      while min_distance - min_distance_global > 0.3 and not(min_distance_global==BIG_NUMBER) :
+      while min_distance - min_distance_global > 0.1 and not(min_distance_global==BIG_NUMBER) :
           print "Generating random position..."
 
           it = int(floor(random.uniform(min_it, max_it)))
