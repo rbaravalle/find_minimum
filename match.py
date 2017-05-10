@@ -11,28 +11,28 @@ min_synth_spectrum = np.zeros(21)
 real_spectrum = []
 
 max_iterations = 20000
-min_it = max_iterations - 10000
-max_it = max_iterations + 20000
+min_it = max_iterations - 20000
+max_it = max_iterations + 30000
 step_it = 10000
 
 max_particles = 16000
-min_part = max_particles - 4000
-max_part = max_particles + 4000
+min_part = max_particles - 16000
+max_part = max_particles + 16000
 step_part = 1000
 
 max_size = 400
-min_size = max_size - 100
+min_size = max_size - 400
 max_size = max_size + 500
 step_size = 50
 
 mid_rand = 0.435
-min_rand = mid_rand - 0.02
-max_rand = mid_rand + 0.05
+min_rand = mid_rand - 0.1
+max_rand = mid_rand + 0.1
 step_rand = 0.01
 
 mid_rand_z = 0.75
-min_rand_z = mid_rand_z - 0.1
-max_rand_z = mid_rand_z + 0.2
+min_rand_z = mid_rand_z - 0.5
+max_rand_z = mid_rand_z + 0.5
 step_rand_z = 0.1
 
 def make_graphics(fds_real, fds_synth, gen_call):
@@ -55,12 +55,11 @@ def compare(it, part, size, rand, rand_z, min_distance):
     #print ""
     os.system(generation_call)
     global real_spectrum
-    distance, synth_spectrum, real_spectrum = test_comparison.compare(real_spectrum)
+    distance, min_spectrum, real_spectrum = test_comparison.compare(real_spectrum)
     print "Distance real - synthetic : ", distance
 
     if(distance < min_distance):
         min_distance = distance
-        min_spectrum = synth_spectrum
         min_call = "Args: " + args_call + ", " + str(min_distance)
 
         make_graphics(real_spectrum, min_spectrum, min_call)
@@ -96,7 +95,7 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
     # first call
     args_call = "ARGS: " + str(it) + " " + str(part) + " " + str(size) + " " + str(rand) + " " + str(rand_z)
     #print args_call
-    min_distance_ret, min_spectrum, min_call, change = compare(it, part, size, rand, rand_z, min_distance)
+    min_distance_ret, min_spectrum1, min_call1, change = compare(it, part, size, rand, rand_z, min_distance)
 
     sign = 1
     if(direction <= 0):
@@ -105,11 +104,13 @@ def go_variable(var_i, it, part, size, rand, rand_z, min_distance):
     min_distance, min_spectrum, min_call, best_vars = go_direction(sign, varss, var_i, min_distance_ret)
     # see if the other direction is better
     print "OTHER DIRECTION"
-    #print min_spectrum
-    #print "               "
-    #print "               "
-    #print "               "
-    #print "               "
+
+    if min_distance_ret < min_distance:
+        min_distance = min_distance_ret
+        min_spectrum = min_spectrum1
+        min_call = min_call1
+        best_vars = varss
+
 
     min_distance2, min_spectrum2, min_call2, best_vars2 = go_direction(-sign, varss, var_i, min_distance)
 
@@ -152,12 +153,8 @@ def follow_gradient_dumb():
 
     while True:
 
-      print "Generating random position!..........."
-      print "..........."
-      print "..........."
-      print "..........."
-      print "..........."
-      print "..........."
+      print "Generating random position..."
+
       # generate random position in hyperspace
       it = int(floor(random.uniform(min_it, max_it)))
       part = int(floor(random.uniform(min_part, max_part)))
@@ -169,32 +166,29 @@ def follow_gradient_dumb():
       min_distance = 100000000
 
       already_visited = np.zeros((5))
-      num_vars = 0
+
       # randomly choose one variable
       var_i = random.randint(0,4)
-      already_visited[var_i] = 1
 
       min_distance, min_spectrum, min_call, best_vars = go_variable(var_i, it, part, size, rand, rand_z, min_distance)
-   
 
-      while(num_vars < 5):
+      already_visited[var_i] = 1
+
+      while(already_visited.sum() < 5):
 
           # randomly choose another variable
-          var_j = random.randint(0,4)
+          var_i = random.randint(0,4)
 
-          while already_visited[var_j] > 0:
-              var_j = random.randint(0,4)
+          while already_visited[var_i] > 0:
+              var_i = random.randint(0,4)
 
-          already_visited[var_j] = 1
+          print "Trying another variable... ", var_i
 
-          print "Trying another variable...   ", var_j
-          print " --  "
-          print " --  "
-          print " --  "
-          print "Num vars tried out: ", num_vars
+          min_distance2, min_spectrum2, min_call2, best_vars2 = go_variable(var_i, best_vars[0], best_vars[1], best_vars[2], best_vars[3], best_vars[4], min_distance)
+
+          already_visited[var_i] = 1
           print "Already visited: ", already_visited
 
-          min_distance2, min_spectrum2, min_call2, best_vars2 = go_variable(var_j, best_vars[0], best_vars[1], best_vars[2], best_vars[3], best_vars[4], min_distance)
 
           if min_distance2 < min_distance:
               min_distance = min_distance2
@@ -203,13 +197,8 @@ def follow_gradient_dumb():
               best_vars = best_vars2
 
               # start over
-              num_vars = 0
               already_visited = np.zeros((5))
               print "Re starting counters"
-          else:
-              num_vars +=1
-
-          var_i = var_j
 
 
       if min_distance < min_distance_global:
