@@ -145,7 +145,6 @@ def follow_gradient_dumb():
     min_call_global = []
     best_vars_global = []
 
-    min_distance = min_distance_global
     min_call = ""
 
     best_vars=[]
@@ -166,6 +165,8 @@ def follow_gradient_dumb():
       rand = random.uniform(min_rand, max_rand)
       rand_z = random.uniform(min_rand_z, max_rand_z)
 
+
+      min_distance = 100000000
 
       already_visited = np.zeros((5))
       num_vars = 0
@@ -204,6 +205,7 @@ def follow_gradient_dumb():
               # start over
               num_vars = 0
               already_visited = np.zeros((5))
+              print "Re starting counters"
           else:
               num_vars +=1
 
