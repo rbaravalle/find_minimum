@@ -82,7 +82,7 @@ def go_direction(sign, varss, var_i, current_minimum):
 
     while(change):
 
-            varss[var_i] += steps[var_i] * sign
+            varss[var_i] += ((0.5 + random.uniform(0,1)) * steps[var_i]) * sign
 
             min_distance, min_spectrum, min_call, change = compare(varss[0], varss[1], varss[2], varss[3], varss[4], min_distance)
 
@@ -163,7 +163,7 @@ def follow_gradient_dumb():
       rand_z = random.uniform(min_rand_z, max_rand_z)
 
       global min_distance_global
-      min_distance, min_spectrum, min_call, _ = compare(it, part, size, rand, rand_z, min_distance_global)
+      min_distance, min_spectrum, min_call, _ = compare(it, part, size, rand, rand_z, BIG_NUMBER)
 
       # Generate a random position close to the last distance found
       while min_distance - min_distance_global > 0.1 and not(min_distance_global==BIG_NUMBER) :
@@ -175,7 +175,7 @@ def follow_gradient_dumb():
           rand = random.uniform(min_rand, max_rand)
           rand_z = random.uniform(min_rand_z, max_rand_z)
 
-          min_distance, min_spectrum, min_call, _ = compare(it, part, size, rand, rand_z, min_distance)
+          min_distance, min_spectrum, min_call, _ = compare(it, part, size, rand, rand_z, BIG_NUMBER)
           print "Too high, recomputing... ", min_distance
 
 
