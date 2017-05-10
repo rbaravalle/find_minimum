@@ -168,7 +168,7 @@ def follow_gradient_dumb():
     min_distance, min_spectrum, min_call, best_vars = go_variable(var_i, it, part, size, rand, rand_z, min_distance)
  
 
-    while(num_vars <= 5):
+    while(num_vars < 5):
 
         # randomly choose another variable
         var_j = random.randint(0,4)
@@ -182,6 +182,8 @@ def follow_gradient_dumb():
         print " --  "
         print " --  "
         print " --  "
+        print "Num vars tried out: ", num_vars
+        print "Already visited: ", already_visited
 
         min_distance2, min_spectrum2, min_call2, best_vars2 = go_variable(var_j, best_vars[0], best_vars[1], best_vars[2], best_vars[3], best_vars[4], min_distance)
 
