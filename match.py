@@ -52,7 +52,7 @@ def make_graphics(fds_real, fds_synth, gen_call):
 def compare(it, part, size, rand, rand_z, min_distance):
     min_call = ""
     min_spectrum = []
-    args_call = str(it) + " " + str(part) + " " + str(size) + " " + str(rand) + " " + str(rand_z)
+    args_call = str( it) + " " + str( part) + " " + str(size) + " " + str('%.4f' % rand) + " " + str('%.4f' % rand_z)
     generation_call = "./porous_generation/porous_generate " + args_call
 
     change=False
@@ -65,7 +65,7 @@ def compare(it, part, size, rand, rand_z, min_distance):
 
     if(distance < min_distance):
         min_distance = distance
-        min_call = "Args: " + args_call + ", " + str(min_distance)
+        min_call = "Args: " + args_call + ", " + str('%.3f' % min_distance)
 
         make_graphics(real_spectrum, min_spectrum, min_call)
         change=True
